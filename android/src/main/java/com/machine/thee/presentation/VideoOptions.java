@@ -1,8 +1,8 @@
 package com.machine.thee.presentation;
 
 public class VideoOptions {
-  boolean showControls = false;
-  String videoUrl = "";
+  public boolean showControls = false;
+  public String videoUrl = "";
 
   VideoOptions(String videoUrl,boolean showControls) {
     this.showControls = showControls;

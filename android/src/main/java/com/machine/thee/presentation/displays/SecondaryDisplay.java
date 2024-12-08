@@ -1,4 +1,4 @@
-package com.machine.thee.presentation;
+package com.machine.thee.presentation.displays;
 
 import android.annotation.SuppressLint;
 import android.app.Presentation;
@@ -18,22 +18,26 @@ import android.widget.MediaController;
 import android.widget.VideoView;
 import java.util.Objects;
 import com.getcapacitor.JSObject;
+import com.machine.thee.presentation.MyWebServer;
+import com.machine.thee.presentation.OpenType;
+import com.machine.thee.presentation.PresentationCallbacks;
+import com.machine.thee.presentation.R;
+import com.machine.thee.presentation.VideoOptions;
+
 import java.io.IOException;
 
 public class SecondaryDisplay extends Presentation {
-
-  CapacitorPresentationPlugin capPlugin = new CapacitorPresentationPlugin();
   private MyWebServer webServer;
   protected String url = "";
   protected String video = "";
   private WebView webView;
   private VideoView videoView;
 
-  private Context outerContext;
+  private final PresentationCallbacks callbacks;
 
-  public SecondaryDisplay(Context outerContext, Display display) {
+  public SecondaryDisplay(Context outerContext, Display display, PresentationCallbacks callbacks) {
     super(outerContext, display);
-    this.outerContext = outerContext;
+    this.callbacks = callbacks;
   }
 
   @Override
@@ -89,13 +93,13 @@ public class SecondaryDisplay extends Presentation {
       webView.setWebViewClient(new WebViewClient() {
         @Override
         public void onPageFinished(WebView view, String _url) {
-          capPlugin.notifyToSuccess(webView, _url);
+          callbacks.onSuccessLoadUrl(webView, _url);
         }
 
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            capPlugin.notifyToFail(webView, error.getErrorCode());
+            callbacks.onFailLoadUrl(webView, error.getErrorCode());
           }
         }
       });
@@ -110,7 +114,7 @@ public class SecondaryDisplay extends Presentation {
 
   public void sendMessage(JSObject jsonData) {
     webView.post(() -> {
-      capPlugin.notifyListener(capPlugin.ON_MESSAGE_EVENT, jsonData);
+      callbacks.onMessage(jsonData);
       webView.evaluateJavascript("javascript:window.receiveFromPresentationCapacitor(" + jsonData.toString() + ")", null);
     });
   }
