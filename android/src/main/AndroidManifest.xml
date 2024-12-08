@@ -5,7 +5,7 @@
 
     <application>
         <activity
-            android:name=".displays.SecondaryDisplay"
+            android:name=".displays.BaseDisplay"
             android:usesCleartextTraffic="true"
             android:exported="false"
             tools:ignore="Instantiatable"

@@ -1,25 +1,22 @@
 package com.machine.thee.presentation.displays;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.Display;
 
 import com.machine.thee.presentation.PresentationCallbacks;
 
-public class UrlDisplay extends BaseWebViewDisplay {
-    public UrlDisplay(Context outerContext, Display display, PresentationCallbacks callbacks) {
+public class HtmlDisplay extends BaseWebViewDisplay {
+    public HtmlDisplay(Context outerContext, Display display, PresentationCallbacks callbacks) {
         super(outerContext, display, callbacks);
     }
 
-    public void start(String url) {
+    public void start(String data) {
         if (webView == null) {
             return;
         }
 
-        String path = Uri.parse(url).toString();
-
         this.startWebView();
 
-        webView.loadUrl(path);
+        webView.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
     }
 }
