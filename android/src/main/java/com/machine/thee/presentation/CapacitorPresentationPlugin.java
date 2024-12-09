@@ -1,6 +1,7 @@
 package com.machine.thee.presentation;
 
 
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.getcapacitor.JSObject;
@@ -19,11 +20,13 @@ public class CapacitorPresentationPlugin extends Plugin {
   private final PresentationCallbacks callbacks = new PresentationCallbacks() {
     @Override
     public void onMessage(JSObject jsObject) {
+      Log.d("presentationDisplays", "onMessage="+ jsObject);
       notifyListeners("onMessage", jsObject, true);
     }
 
     @Override
     public void onSuccessLoadUrl(WebView view, String url) {
+      Log.d("presentationDisplays", "onSuccessLoadUrl="+url);
       JSObject response = new JSObject();
       response.put("result", url);
       response.put("message", "success");
@@ -32,6 +35,7 @@ public class CapacitorPresentationPlugin extends Plugin {
 
     @Override
     public void onFailLoadUrl(WebView view, int errorCode) {
+      Log.d("presentationDisplays", "onFailLoadUrl="+errorCode);
       JSObject response = new JSObject();
       response.put("result", errorCode);
       response.put("message", "fail");

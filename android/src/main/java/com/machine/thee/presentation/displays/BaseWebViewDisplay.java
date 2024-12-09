@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -13,9 +15,14 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.annotation.NonNull;
+
 import com.getcapacitor.JSObject;
 import com.machine.thee.presentation.PresentationCallbacks;
 import com.machine.thee.presentation.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 abstract public class BaseWebViewDisplay extends BaseDisplay {
     protected final PresentationCallbacks callbacks;
@@ -34,13 +41,22 @@ abstract public class BaseWebViewDisplay extends BaseDisplay {
         webView.setVisibility(View.VISIBLE);
     }
 
+    public void sendMessage(JSObject jsonData) {
+        if (webView == null) {
+            return;
+        }
+
+        webView.post(() -> {
+            webView.evaluateJavascript("javascript:window.receiveFromPresentationCapacitor(" + jsonData.toString() + ")", null);
+        });
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     protected void startWebView() {
         if (webView == null) {
             return;
         }
 
-        // webView.addJavascriptInterface(new MessageEvents(data), "presentationCapacitor");
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
@@ -51,6 +67,7 @@ abstract public class BaseWebViewDisplay extends BaseDisplay {
         webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        webView.addJavascriptInterface(new MessageEvents(), "presentationCapacitor");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -69,14 +86,11 @@ abstract public class BaseWebViewDisplay extends BaseDisplay {
         webView.setWebChromeClient(new WebChromeClient());
     }
 
-    public void sendMessage(JSObject jsonData) {
-        if (webView == null) {
-            return;
+    private class MessageEvents {
+        @JavascriptInterface
+        public void sendMessage(String jsonData) throws JSONException {
+            Log.d("presentationDisplays", "sendMessage(JSONObject)="+ jsonData);
+            callbacks.onMessage(new JSObject(jsonData));
         }
-
-        webView.post(() -> {
-            callbacks.onMessage(jsonData);
-            webView.evaluateJavascript("javascript:window.receiveFromPresentationCapacitor(" + jsonData.toString() + ")", null);
-        });
     }
 }
